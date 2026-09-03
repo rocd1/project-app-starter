@@ -8,7 +8,5 @@ export function initializeApp(): Promise<void> {
 
   return firstValueFrom(
     csrfService.initialize(),
-  ).then(() => {
-    console.log('CSRF initialization successful.');
-  });
+  ).then(() => undefined);
 }
