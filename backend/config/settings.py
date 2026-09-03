@@ -94,9 +94,6 @@ MIDDLEWARE
 """
 
 MIDDLEWARE = [
-    #csrf
-    "django.middleware.csrf.CsrfViewMiddleware",
-
     #Security
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -107,6 +104,7 @@ MIDDLEWARE = [
     #Django
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    #csrf
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -375,8 +373,10 @@ ALLOWED_HOSTS = env.list(
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
     default=[
+        
         "http://localhost:4200",
     ],
+    
 )
 
 CORS_ALLOW_CREDENTIALS = True
@@ -584,6 +584,7 @@ if DEBUG:
         "'self'",
 
         "http://localhost:4200",
+        
 
     )
 

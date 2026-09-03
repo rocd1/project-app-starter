@@ -1,0 +1,78 @@
+<main class="auth-page">
+  <section class="auth-card">
+    <a routerLink="/" class="back-link">
+      ← Back to home
+    </a>
+
+    <div class="heading">
+      <p class="eyebrow">PROJECT APP STARTER</p>
+
+      <h1>Sign in</h1>
+
+      <p>Sign in to continue.</p>
+    </div>
+
+    @if (errorMessage) {
+      <div class="error-message" role="alert">
+        {{ errorMessage }}
+      </div>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="submit()">
+      <div class="field">
+        <label for="username">Username</label>
+
+        <input
+          id="username"
+          type="text"
+          formControlName="username"
+          autocomplete="username"
+        />
+
+        @if (
+          loginForm.controls.username.touched &&
+          loginForm.controls.username.hasError('required')
+        ) {
+          <small>Username is required.</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+        />
+
+        @if (
+          loginForm.controls.password.touched &&
+          loginForm.controls.password.hasError('required')
+        ) {
+          <small>Password is required.</small>
+        }
+      </div>
+
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="isSubmitting"
+      >
+        {{ isSubmitting ? 'Signing in...' : 'Sign In' }}
+      </button>
+    </form>
+
+    <div class="links">
+      <p>
+        Don't have an account?
+        <a routerLink="/register">Create one</a>
+      </p>
+
+      <p>
+        <a routerLink="/guest">Continue as Guest</a>
+      </p>
+    </div>
+  </section>
+</main>

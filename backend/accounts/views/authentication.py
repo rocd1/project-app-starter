@@ -61,10 +61,10 @@ class CsrfView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        get_token(request)
+        csrf_token = get_token(request)
 
         return Response(
-            {"message": "CSRF cookie set."},
+            {"csrfToken": csrf_token,},
             status=status.HTTP_200_OK,
         )
 
