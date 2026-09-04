@@ -13,4 +13,7 @@ urlpatterns = [
         "admin/",
         include("accounts.urls.admin"),
     ),
+
+    #test
+    path("", include("accounts.urls.test")),
 ]

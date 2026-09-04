@@ -7,6 +7,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/auth/services/auth.service';
+import { AuthStateService } from '../../../core/auth/services/auth-state';
 
 @Component({
   selector: 'app-login',
@@ -17,6 +18,7 @@ import { AuthService } from '../../../core/auth/services/auth.service';
 export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly authStateService = inject(AuthStateService);
   private readonly router = inject(Router);
 
   protected readonly loginForm = this.fb.nonNullable.group({
@@ -39,8 +41,22 @@ export class Login {
 
     this.authService.login(this.loginForm.getRawValue()).subscribe({
       next: () => {
-        this.isSubmitting = false;
-        void this.router.navigate(['/auth-test']);
+        this.authService.getCurrentUser().subscribe({
+          next: (user) => {
+            this.authStateService.setUser(user);
+
+            this.isSubmitting = false;
+
+            void this.router.navigate(['/app']);
+          },
+
+          error: () => {
+            this.isSubmitting = false;
+
+            this.errorMessage =
+              'Unable to load your account information. Please try again.';
+          },
+        });
       },
 
       error: (error) => {

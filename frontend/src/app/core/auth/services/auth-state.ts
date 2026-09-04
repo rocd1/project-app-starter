@@ -1,5 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, catchError, of, tap } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  BehaviorSubject,
+  Observable,
+  catchError,
+  of,
+  tap,
+  throwError,
+} from 'rxjs';
 
 import { AuthService } from './auth.service';
 import { User } from '../models/auth.models';
@@ -20,18 +28,24 @@ export class AuthStateService {
 
   initialize(): Observable<User | null> {
     if (this.initialized) {
-      return this.currentUser$;
+      return of(this.currentUserSubject.value);
     }
-
-    this.initialized = true;
 
     return this.authService.getCurrentUser().pipe(
       tap((user) => {
         this.currentUserSubject.next(user);
+        this.initialized = true;
       }),
-      catchError(() => {
-        this.currentUserSubject.next(null);
-        return of(null);
+
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          this.currentUserSubject.next(null);
+          this.initialized = true;
+
+          return of(null);
+        }
+
+        return throwError(() => error);
       }),
     );
   }

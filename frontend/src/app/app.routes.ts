@@ -6,7 +6,18 @@ import { Register } from './pages/auth/register/register';
 import { Guest } from './pages/guest/guest';
 import { AuthTest } from './pages/auth-test/auth-test';
 
+import { App } from './pages/app/app';
+import { authGuard } from './core/guards/auth-guard';
+
+
 export const routes: Routes = [
+
+  {
+    path: 'app',
+    component: App,
+    canActivate: [authGuard],
+  },
+
   {
     path: '',
     component: Landing,

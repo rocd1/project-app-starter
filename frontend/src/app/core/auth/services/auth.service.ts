@@ -104,4 +104,15 @@ export class AuthService {
       },
     );
   }
+
+
+
+  testProtectedEndpoint(): Observable<ApiMessageResponse> {
+    return this.http.get<ApiMessageResponse>(
+      `${API_CONFIG.baseUrl}/api/test/protected/`,
+      { withCredentials: true },
+    );
+  }
+
+  
 }
