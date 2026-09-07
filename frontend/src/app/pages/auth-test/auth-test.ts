@@ -71,4 +71,21 @@ export class AuthTest {
       },
     });
   }
+
+
+  testUnauthenticatedMe(): void {
+    this.authService.getCurrentUser().subscribe({
+      next: (response) => {
+        console.log('Unexpected success:', response);
+      },
+      error: (error) => {
+        console.log('ME status:', error.status);
+        console.log('ME response body:', error.error);
+        console.log('Full ME error:', error);
+      },
+    });
+  }
+
+
+
 }

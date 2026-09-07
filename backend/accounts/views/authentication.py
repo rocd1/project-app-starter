@@ -13,6 +13,7 @@ from rest_framework.throttling import (
 
 from rest_framework.views import APIView
 
+from rest_framework_simplejwt.exceptions import TokenError
 
 from rest_framework_simplejwt.serializers import (
     TokenRefreshSerializer,
@@ -261,7 +262,7 @@ class ChangePasswordView(APIView):
         ScopedRateThrottle,
     ]
 
-    throttle_scope = "password_reset"
+    throttle_scope = "change_password"
 
     def post(self, request):
 
@@ -361,9 +362,18 @@ class RefreshTokenView(APIView):
             }
         )
 
-        serializer.is_valid(
-            raise_exception=True,
-        )
+        try:
+            serializer.is_valid(
+                raise_exception=True,
+            )
+
+        except TokenError:
+            return Response(
+                {
+                    "detail": "Refresh token is invalid or expired.",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
 
         new_refresh = RefreshToken(
@@ -385,33 +395,6 @@ class RefreshTokenView(APIView):
         )
 
         return response
-
-
-
-
-        '''
-        refresh_token = RefreshToken(
-            serializer.validated_data["refresh"]
-        )
-
-        response = Response(
-            {
-                "message": (
-                    "Token refreshed successfully."
-                )
-            },
-            status=status.HTTP_200_OK,
-        )
-
-        set_jwt_cookies(
-            response,
-            refresh_token,
-        )
-
-        return response
-    '''
-
-
 
 
 

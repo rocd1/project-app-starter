@@ -46,6 +46,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def validate_email(self, value):
+        value = value.strip().lower()
 
         if User.objects.filter(email=value).exists():
 
@@ -116,12 +117,17 @@ class LoginSerializer(serializers.Serializer):
                 "Invalid username or password."
             )
 
-        if not user.is_active:
+        
+        # Do not expose whether an account exists but is disabled.
+        # Django's authentication backend handles inactive users.
+        
+        #if not user.is_active:
 
-            raise serializers.ValidationError(
-                "This account has been disabled."
-            )
-
+        #   raise serializers.ValidationError(
+        #       "This account has been disabled."
+        #   )
+        
+            
         attrs["user"] = user
 
         return attrs

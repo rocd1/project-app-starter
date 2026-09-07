@@ -21,4 +21,49 @@ export class App {
       },
     });
   }
+
+  testConcurrentRequests(): void {
+    console.log('Starting 3 concurrent protected requests...');
+
+    this.authService.testProtectedEndpoint().subscribe({
+      next: (response) => {
+        console.log('Request A success:', response);
+      },
+      error: (error) => {
+        console.error('Request A error:', error);
+      },
+    });
+
+    this.authService.testProtectedEndpoint().subscribe({
+      next: (response) => {
+        console.log('Request B success:', response);
+      },
+      error: (error) => {
+        console.error('Request B error:', error);
+      },
+    });
+
+    this.authService.testProtectedEndpoint().subscribe({
+      next: (response) => {
+        console.log('Request C success:', response);
+      },
+      error: (error) => {
+        console.error('Request C error:', error);
+      },
+    });
+  }
+
+  testUnauthenticatedMe(): void {
+    this.authService.getCurrentUser().subscribe({
+      next: (response) => {
+        console.log('Unexpected success:', response);
+      },
+      error: (error) => {
+        console.log('ME status:', error.status);
+        console.log('ME response body:', error.error);
+        console.log('Full ME error:', error);
+      },
+    });
+  }
+  
 }
