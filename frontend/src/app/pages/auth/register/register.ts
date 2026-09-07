@@ -6,6 +6,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
+import { ApiErrorService } from '../../../core/errors/api-error.service';
 import { AuthService } from '../../../core/auth/services/auth.service';
 
 @Component({
@@ -17,11 +18,12 @@ import { AuthService } from '../../../core/auth/services/auth.service';
 export class Register {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly apiErrorService = inject(ApiErrorService);
   private readonly router = inject(Router);
 
   protected readonly registerForm = this.fb.nonNullable.group({
     username: ['', [Validators.required]],
-    email: ['', [Validators.email]],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
     password_confirm: ['', [Validators.required]],
   });
@@ -31,6 +33,7 @@ export class Register {
 
   protected submit(): void {
     this.errorMessage = '';
+    this.clearServerErrors();
 
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -55,15 +58,48 @@ export class Register {
       error: (error) => {
         this.isSubmitting = false;
 
-        if (error.status === 400) {
-          this.errorMessage =
-            'Please check your registration details.';
-          return;
-        }
+        const apiError = this.apiErrorService.normalize(error);
 
-        this.errorMessage =
-          'Unable to create your account right now. Please try again.';
+        this.applyFieldErrors(apiError.fieldErrors);
+
+        if (apiError.message) {
+          this.errorMessage = apiError.message;
+        }
       },
     });
+  }
+
+  private applyFieldErrors(
+    fieldErrors: Record<string, string[]>,
+  ): void {
+    for (const [fieldName, messages] of Object.entries(fieldErrors)) {
+      const control = this.registerForm.get(fieldName);
+
+      if (!control || messages.length === 0) {
+        continue;
+      }
+
+      control.setErrors({
+        ...control.errors,
+        server: messages[0],
+      });
+
+      control.markAsTouched();
+    }
+  }
+
+  private clearServerErrors(): void {
+    for (const control of Object.values(this.registerForm.controls)) {
+      if (!control.errors?.['server']) {
+        continue;
+      }
+
+      const errors = { ...control.errors };
+      delete errors['server'];
+
+      control.setErrors(
+        Object.keys(errors).length > 0 ? errors : null,
+      );
+    }
   }
 }
