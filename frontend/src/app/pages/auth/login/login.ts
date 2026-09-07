@@ -12,7 +12,6 @@ import { AuthStateService } from '../../../core/auth/services/auth-state';
 import { ApiErrorService } from '../../../core/errors/api-error.service';
 
 
-
 @Component({
   selector: 'app-login',
   imports: [ReactiveFormsModule, RouterLink],
@@ -23,6 +22,7 @@ export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly authStateService = inject(AuthStateService);
+  private readonly apiErrorService = inject(ApiErrorService);
   private readonly router = inject(Router);
 
   protected readonly loginForm = this.fb.nonNullable.group({
@@ -66,14 +66,14 @@ export class Login {
       error: (error) => {
         this.isSubmitting = false;
 
-        if (error.status === 400 || error.status === 401) {
-          this.errorMessage = 'Invalid username or password.';
-          return;
-        }
+        const apiError = this.apiErrorService.normalize(error);
+
+        console.log('NORMALIZED API ERROR:', apiError);
 
         this.errorMessage =
-          'Unable to sign in right now. Please try again.';
+          apiError.message ?? 'Unable to sign in right now. Please try again.';
       },
+
     });
   }
 }
