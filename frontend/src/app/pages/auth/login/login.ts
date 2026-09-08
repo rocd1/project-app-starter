@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -8,9 +8,7 @@ import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { AuthStateService } from '../../../core/auth/services/auth-state';
-
 import { ApiErrorService } from '../../../core/errors/api-error.service';
-
 
 @Component({
   selector: 'app-login',
@@ -30,18 +28,18 @@ export class Login {
     password: ['', [Validators.required]],
   });
 
-  protected isSubmitting = false;
-  protected errorMessage = '';
+  protected readonly isSubmitting = signal(false);
+  protected readonly errorMessage = signal('');
 
   protected submit(): void {
-    this.errorMessage = '';
+    this.errorMessage.set('');
 
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
 
-    this.isSubmitting = true;
+    this.isSubmitting.set(true);
 
     this.authService.login(this.loginForm.getRawValue()).subscribe({
       next: () => {
@@ -49,31 +47,31 @@ export class Login {
           next: (user) => {
             this.authStateService.setUser(user);
 
-            this.isSubmitting = false;
+            this.isSubmitting.set(false);
 
             void this.router.navigate(['/app']);
           },
 
           error: () => {
-            this.isSubmitting = false;
+            this.isSubmitting.set(false);
 
-            this.errorMessage =
-              'Unable to load your account information. Please try again.';
+            this.errorMessage.set(
+              'Unable to load your account information. Please try again.',
+            );
           },
         });
       },
 
       error: (error) => {
-        this.isSubmitting = false;
+        this.isSubmitting.set(false);
 
         const apiError = this.apiErrorService.normalize(error);
 
-        console.log('NORMALIZED API ERROR:', apiError);
-
-        this.errorMessage =
-          apiError.message ?? 'Unable to sign in right now. Please try again.';
+        this.errorMessage.set(
+          apiError.message ??
+            'Unable to sign in right now. Please try again.',
+        );
       },
-
     });
   }
 }

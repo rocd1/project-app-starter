@@ -114,13 +114,5 @@ export class AuthService {
     );
   }
 
-
-  revokeRefreshForTesting(): Observable<ApiMessageResponse> {
-    return this.http.post<ApiMessageResponse>(
-      `${API_CONFIG.baseUrl}/api/test/revoke-refresh/`,
-      {},
-      { withCredentials: true },
-    );
-  }
   
 }
