@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -28,11 +28,11 @@ export class Register {
     password_confirm: ['', [Validators.required]],
   });
 
-  protected isSubmitting = false;
-  protected errorMessage = '';
+  protected readonly isSubmitting = signal(false);
+  protected readonly errorMessage = signal('');
 
   protected submit(): void {
-    this.errorMessage = '';
+    this.errorMessage.set('');
     this.clearServerErrors();
 
     if (this.registerForm.invalid) {
@@ -43,27 +43,28 @@ export class Register {
     const formValue = this.registerForm.getRawValue();
 
     if (formValue.password !== formValue.password_confirm) {
-      this.errorMessage = 'Passwords do not match.';
+      this.errorMessage.set('Passwords do not match.');
       return;
     }
 
-    this.isSubmitting = true;
+    this.isSubmitting.set(true);
 
     this.authService.register(formValue).subscribe({
       next: () => {
-        this.isSubmitting = false;
+        this.isSubmitting.set(false);
+
         void this.router.navigate(['/login']);
       },
 
       error: (error) => {
-        this.isSubmitting = false;
+        this.isSubmitting.set(false);
 
         const apiError = this.apiErrorService.normalize(error);
 
         this.applyFieldErrors(apiError.fieldErrors);
 
         if (apiError.message) {
-          this.errorMessage = apiError.message;
+          this.errorMessage.set(apiError.message);
         }
       },
     });
