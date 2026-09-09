@@ -6,6 +6,8 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
+import { catchError, switchMap, throwError } from 'rxjs';
+
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { AuthStateService } from '../../../core/auth/services/auth-state';
 import { ApiErrorService } from '../../../core/errors/api-error.service';
@@ -31,6 +33,7 @@ export class Login {
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal('');
 
+  
   protected submit(): void {
     this.errorMessage.set('');
 
@@ -41,37 +44,43 @@ export class Login {
 
     this.isSubmitting.set(true);
 
-    this.authService.login(this.loginForm.getRawValue()).subscribe({
-      next: () => {
-        this.authService.getCurrentUser().subscribe({
-          next: (user) => {
-            this.authStateService.setUser(user);
+    this.authService
+      .login(this.loginForm.getRawValue())
+      .pipe(
+        switchMap(() =>
+          this.authService.getCurrentUser().pipe(
+            catchError((error) => {
+              this.isSubmitting.set(false);
 
-            this.isSubmitting.set(false);
+              this.errorMessage.set(
+                'Unable to load your account information. Please try again.',
+              );
 
-            void this.router.navigate(['/app']);
-          },
+              return throwError(() => error);
+            }),
+          ),
+        ),
+      )
+      .subscribe({
+        next: (user) => {
+          this.authStateService.setUser(user);
 
-          error: () => {
-            this.isSubmitting.set(false);
+          this.isSubmitting.set(false);
 
-            this.errorMessage.set(
-              'Unable to load your account information. Please try again.',
-            );
-          },
-        });
-      },
+          void this.router.navigate(['/app']);
+        },
 
-      error: (error) => {
-        this.isSubmitting.set(false);
+        error: (error) => {
+          this.isSubmitting.set(false);
 
-        const apiError = this.apiErrorService.normalize(error);
+          const apiError = this.apiErrorService.normalize(error);
 
-        this.errorMessage.set(
-          apiError.message ??
-            'Unable to sign in right now. Please try again.',
-        );
-      },
-    });
+          this.errorMessage.set(
+            apiError.message ??
+              'Unable to sign in right now. Please try again.',
+          );
+        },
+      });
   }
+
 }
