@@ -10,6 +10,8 @@ import { App } from './pages/app/app';
 import { authGuard } from './core/guards/auth-guard';
 
 
+import { RequestStateTest } from './pages/request-state-test/request-state-test';
+
 export const routes: Routes = [
 
   {
@@ -40,6 +42,13 @@ export const routes: Routes = [
     path: 'auth-test',
     component: AuthTest,
   },
+
+  //temporary request state test
+  {
+    path: 'request-state-test',
+    component: RequestStateTest,
+  },
+
 
   // Unknown routes return to the landing page.
   {
