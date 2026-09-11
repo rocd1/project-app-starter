@@ -12,10 +12,12 @@
       <p>Create an account to get started.</p>
     </div>
 
-    @if (errorMessage()) {
-      <div class="error-message" role="alert">
-        {{ errorMessage () }}
-      </div>
+    @if (requestState(); as state) {
+      @if (state.status === 'error' && state.error.message) {
+        <div class="error-message" role="alert">
+          {{ state.error.message }}
+        </div>
+      }
     }
 
     <form [formGroup]="registerForm" (ngSubmit)="submit()">
@@ -131,6 +133,13 @@
         }
 
         @if (
+          registerForm.touched &&
+          registerForm.hasError('passwordMismatch')
+        ) {
+          <small>Passwords do not match.</small>
+        }
+
+        @if (
           registerForm.controls.password_confirm.hasError('server')
         ) {
           <small>
@@ -144,9 +153,13 @@
       <button
         type="submit"
         class="submit-button"
-        [disabled]="isSubmitting()"
+        [disabled]="requestState().status === 'loading'"
       >
-        {{ isSubmitting() ? 'Creating account...' : 'Create Account' }}
+        {{
+          requestState().status === 'loading'
+            ? 'Creating account...'
+            : 'Create Account'
+        }}
       </button>
     </form>
 

@@ -1,13 +1,24 @@
 import { Component, inject, signal } from '@angular/core';
+
 import {
+  AbstractControl,
   FormBuilder,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
+
 import { Router, RouterLink } from '@angular/router';
 
 import { ApiErrorService } from '../../../core/errors/api-error.service';
 import { AuthService } from '../../../core/auth/services/auth.service';
+
+import { ApiMessageResponse } from '../../../core/auth/models/auth.models';
+
+import { RequestState } from '../../../core/state/request-state';
+
+import { toRequestState } from '../../../core/state/request-state.utils';
+
 
 @Component({
   selector: 'app-register',
@@ -21,18 +32,24 @@ export class Register {
   private readonly apiErrorService = inject(ApiErrorService);
   private readonly router = inject(Router);
 
-  protected readonly registerForm = this.fb.nonNullable.group({
-    username: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    password_confirm: ['', [Validators.required]],
-  });
+  protected readonly registerForm = this.fb.nonNullable.group(
+    {
+      username: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      password_confirm: ['', [Validators.required]],
+    },
+    {
+      validators: [passwordMatchValidator],
+    },
+  );
 
-  protected readonly isSubmitting = signal(false);
-  protected readonly errorMessage = signal('');
+  protected readonly requestState =
+    signal<RequestState<ApiMessageResponse>>({
+      status: 'idle',
+    });
 
   protected submit(): void {
-    this.errorMessage.set('');
     this.clearServerErrors();
 
     if (this.registerForm.invalid) {
@@ -42,31 +59,20 @@ export class Register {
 
     const formValue = this.registerForm.getRawValue();
 
-    if (formValue.password !== formValue.password_confirm) {
-      this.errorMessage.set('Passwords do not match.');
-      return;
-    }
+    toRequestState(
+      this.authService.register(formValue),
+      this.apiErrorService,
+    ).subscribe((state) => {
+      this.requestState.set(state);
 
-    this.isSubmitting.set(true);
-
-    this.authService.register(formValue).subscribe({
-      next: () => {
-        this.isSubmitting.set(false);
-
+      if (state.status === 'success') {
         void this.router.navigate(['/login']);
-      },
+        return;
+      }
 
-      error: (error) => {
-        this.isSubmitting.set(false);
-
-        const apiError = this.apiErrorService.normalize(error);
-
-        this.applyFieldErrors(apiError.fieldErrors);
-
-        if (apiError.message) {
-          this.errorMessage.set(apiError.message);
-        }
-      },
+      if (state.status === 'error') {
+        this.applyFieldErrors(state.error.fieldErrors);
+      }
     });
   }
 
@@ -103,4 +109,20 @@ export class Register {
       );
     }
   }
+}
+
+
+function passwordMatchValidator(
+  control: AbstractControl,
+): ValidationErrors | null {
+  const password = control.get('password')?.value;
+  const passwordConfirm = control.get('password_confirm')?.value;
+
+  if (password === passwordConfirm) {
+    return null;
+  }
+
+  return {
+    passwordMismatch: true,
+  };
 }
