@@ -1,16 +1,24 @@
 import { Component, inject, signal } from '@angular/core';
+
 import {
   FormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+
 import { Router, RouterLink } from '@angular/router';
 
-import { catchError, switchMap, throwError } from 'rxjs';
+import { switchMap } from 'rxjs';
 
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { AuthStateService } from '../../../core/auth/services/auth-state';
 import { ApiErrorService } from '../../../core/errors/api-error.service';
+
+import { User } from '../../../core/auth/models/auth.models';
+
+import { RequestState } from '../../../core/state/request-state';
+
+import { toRequestState } from '../../../core/state/request-state.utils';
 
 @Component({
   selector: 'app-login',
@@ -30,57 +38,37 @@ export class Login {
     password: ['', [Validators.required]],
   });
 
-  protected readonly isSubmitting = signal(false);
-  protected readonly errorMessage = signal('');
+  protected readonly requestState =
+    signal<RequestState<User>>({
+      status: 'idle',
+    });
 
-  
   protected submit(): void {
-    this.errorMessage.set('');
+    if (this.requestState().status === 'loading') {
+      return;
+    }
 
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
 
-    this.isSubmitting.set(true);
+    const formValue = this.loginForm.getRawValue();
 
-    this.authService
-      .login(this.loginForm.getRawValue())
-      .pipe(
+    toRequestState(
+      this.authService.login(formValue).pipe(
         switchMap(() =>
-          this.authService.getCurrentUser().pipe(
-            catchError((error) => {
-              this.isSubmitting.set(false);
-
-              this.errorMessage.set(
-                'Unable to load your account information. Please try again.',
-              );
-
-              return throwError(() => error);
-            }),
-          ),
+          this.authService.getCurrentUser(),
         ),
-      )
-      .subscribe({
-        next: (user) => {
-          this.authStateService.setUser(user);
+      ),
+      this.apiErrorService,
+    ).subscribe((state) => {
+      this.requestState.set(state);
 
-          this.isSubmitting.set(false);
-
-          void this.router.navigate(['/app']);
-        },
-
-        error: (error) => {
-          this.isSubmitting.set(false);
-
-          const apiError = this.apiErrorService.normalize(error);
-
-          this.errorMessage.set(
-            apiError.message ??
-              'Unable to sign in right now. Please try again.',
-          );
-        },
-      });
+      if (state.status === 'success') {
+        this.authStateService.setUser(state.data);
+        void this.router.navigate(['/app']);
+      }
+    });
   }
-
 }
