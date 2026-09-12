@@ -1,9 +1,9 @@
 .landing-page {
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 2rem 0;
 }
 
 .hero {
@@ -49,6 +49,7 @@ h1 {
   text-align: center;
   text-decoration: none;
   font-weight: 600;
+  box-sizing: border-box;
 }
 
 .primary {
@@ -64,4 +65,18 @@ h1 {
 .guest-link {
   color: inherit;
   font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+  .landing-page {
+    padding: 1.5rem 0;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .actions {
+    margin-top: 2rem;
+  }
 }
