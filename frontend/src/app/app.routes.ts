@@ -12,6 +12,9 @@ import { authGuard } from './core/guards/auth-guard';
 
 import { RequestStateTest } from './pages/request-state-test/request-state-test';
 
+import { PublicLayout } from './layouts/public-layout/public-layout';
+
+
 export const routes: Routes = [
 
   {
@@ -22,20 +25,28 @@ export const routes: Routes = [
 
   {
     path: '',
-    component: Landing,
+    component: PublicLayout,
+    children: [
+
+      {
+        path: '',
+        component: Landing,
+      },
+      {
+        path: 'login',
+        component: Login,
+      },
+      {
+        path: 'register',
+        component: Register,
+      },
+      {
+        path: 'guest',
+        component: Guest,
+      },
+    ],
   },
-  {
-    path: 'login',
-    component: Login,
-  },
-  {
-    path: 'register',
-    component: Register,
-  },
-  {
-    path: 'guest',
-    component: Guest,
-  },
+
 
   // Temporary developer diagnostic page.
   {
