@@ -4,30 +4,46 @@ import { Landing } from './pages/landing/landing';
 import { Login } from './pages/auth/login/login';
 import { Register } from './pages/auth/register/register';
 import { Guest } from './pages/guest/guest';
+
 import { AuthTest } from './pages/auth-test/auth-test';
-
-import { App } from './pages/app/app';
-import { authGuard } from './core/guards/auth-guard';
-
-
 import { RequestStateTest } from './pages/request-state-test/request-state-test';
 
+import { App } from './pages/app/app';
+
+import { authGuard } from './core/guards/auth-guard';
+
 import { PublicLayout } from './layouts/public-layout/public-layout';
+import { AppLayout } from './layouts/app-layout/app-layout';
 
 
 export const routes: Routes = [
 
+  // ============================================================
+  // PROTECTED APPLICATION
+  // ============================================================
+
   {
     path: 'app',
-    component: App,
+    component: AppLayout,
     canActivate: [authGuard],
+
+    children: [
+      {
+        path: '',
+        component: App,
+      },
+    ],
   },
+
+  // ============================================================
+  // PUBLIC PAGES
+  // ============================================================
 
   {
     path: '',
     component: PublicLayout,
-    children: [
 
+    children: [
       {
         path: '',
         component: Landing,
@@ -47,21 +63,24 @@ export const routes: Routes = [
     ],
   },
 
+  // ============================================================
+  // TEMPORARY DEVELOPER PAGES
+  // ============================================================
 
-  // Temporary developer diagnostic page.
   {
     path: 'auth-test',
     component: AuthTest,
   },
 
-  //temporary request state test
   {
     path: 'request-state-test',
     component: RequestStateTest,
   },
 
+  // ============================================================
+  // FALLBACK
+  // ============================================================
 
-  // Unknown routes return to the landing page.
   {
     path: '**',
     redirectTo: '',
