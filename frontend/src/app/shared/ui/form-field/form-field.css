@@ -1,0 +1,22 @@
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field label {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.control small {
+  color: #dc2626;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
