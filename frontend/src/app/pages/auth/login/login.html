@@ -57,9 +57,9 @@
         }
       </div>
 
-      <button
+      <app-button
         type="submit"
-        class="submit-button"
+        variant="primary"
         [disabled]="requestState().status === 'loading'"
       >
         {{
@@ -67,7 +67,7 @@
             ? 'Signing in...'
             : 'Sign In'
         }}
-      </button>
+      </app-button>
     </form>
 
     <div class="links">

@@ -7,11 +7,13 @@ import { Component, input } from '@angular/core';
   styleUrl: './button.css',
 })
 export class Button {
-  protected readonly type = input<
+  readonly type = input<
     'button' | 'submit' | 'reset'
   >('button');
 
-  protected readonly variant = input<
+  readonly variant = input<
     'primary' | 'secondary'
   >('primary');
+
+  readonly disabled = input(false);
 }

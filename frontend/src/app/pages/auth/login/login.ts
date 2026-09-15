@@ -20,9 +20,12 @@ import { RequestState } from '../../../core/state/request-state';
 
 import { toRequestState } from '../../../core/state/request-state.utils';
 
+import { Button } from '../../../shared/ui/button/button';
+
+
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Button],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
