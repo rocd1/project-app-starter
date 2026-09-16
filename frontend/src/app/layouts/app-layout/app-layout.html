@@ -1,15 +1,89 @@
 <div class="app-layout">
+
   <header class="app-header">
-    <a routerLink="/app" class="brand">
-      Project App Starter
+    
+    <button
+      type="button"
+      class="icon-button"
+      [attr.aria-label]="isMenuOpen() ? 'Close menu' : 'Open menu'"
+      [attr.aria-expanded]="isMenuOpen()"
+      (click)="toggleMenu()"
+    >
+      {{ isMenuOpen() ? '✕' : '☰' }}
+    </button>
+
+
+    <a
+      routerLink="/app"
+      class="brand"
+    >
+      PROJECT APP
     </a>
+
+    <button
+      type="button"
+      class="icon-button"
+      aria-label="Search"
+    >
+      🔍
+    </button>
   </header>
+
+  
+  @if (isMenuOpen()) {
+    <nav
+      class="menu-panel"
+      aria-label="Secondary navigation"
+    >
+      <a routerLink="/app">Settings</a>
+      <a routerLink="/app">Contact Us</a>
+      <a routerLink="/app">Community</a>
+
+      <div class="menu-divider"></div>
+
+      <a routerLink="/app">Logout</a>
+    </nav>
+  }
+
+  
+
 
   <main class="app-main">
     <router-outlet />
   </main>
 
-  <footer class="app-footer">
-    <p>Project App Starter</p>
-  </footer>
+  <nav
+    class="bottom-navigation"
+    aria-label="Main navigation"
+  >
+    <a routerLink="/app">
+      <span class="navigation-icon">⌂</span>
+      <span>Home</span>
+    </a>
+
+    <a routerLink="/app">
+      <span class="navigation-icon">♙</span>
+      <span>Profile</span>
+    </a>
+
+    <a
+      routerLink="/app"
+      class="new-button"
+      aria-label="Create new"
+    >
+      <span class="new-icon">+</span>
+      <span>New</span>
+    </a>
+
+    <a routerLink="/app">
+      <span class="navigation-icon">▣</span>
+      <span>Dashboard</span>
+    </a>
+
+    <a routerLink="/app">
+      <span class="navigation-icon">◆</span>
+      <span>Genre</span>
+    </a>
+  </nav>
+
 </div>
